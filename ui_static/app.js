@@ -10,6 +10,71 @@ const DEFAULT_Q =
 const questionEl = document.getElementById("question");
 questionEl.value = DEFAULT_Q;
 
+// Runaway dodo: wanders the viewport in random hops. Click it and it's gone.
+(function setupDodo() {
+  const dodo = document.getElementById("dodoRunner");
+  if (!dodo) return;
+  const img = dodo.querySelector(".dodo-img");
+
+  let caught = false;
+  let pendingMove = null;
+
+  // Start somewhere visible-ish (mid-viewport) so the first hop has somewhere to go.
+  let lastX = window.innerWidth * 0.5;
+  let lastY = window.innerHeight * 0.5;
+  dodo.style.transform = `translate(${Math.round(lastX)}px, ${Math.round(lastY)}px)`;
+
+  function pickTarget() {
+    const margin = 24;
+    const w = dodo.offsetWidth || 120;
+    const h = dodo.offsetHeight || 120;
+    const maxX = Math.max(margin, window.innerWidth - w - margin);
+    const maxY = Math.max(margin, window.innerHeight - h - margin);
+    return {
+      x: margin + Math.random() * (maxX - margin),
+      y: margin + Math.random() * (maxY - margin),
+    };
+  }
+
+  function hop() {
+    if (caught) return;
+    const { x, y } = pickTarget();
+    // Vary speed so it doesn't feel mechanical (1.4-2.8s per hop).
+    const duration = 1400 + Math.random() * 1400;
+    dodo.style.transitionDuration = duration + "ms";
+    dodo.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+    // Face the direction of travel.
+    if (x < lastX - 4) img.style.setProperty("--flip", "-1");
+    else if (x > lastX + 4) img.style.setProperty("--flip", "1");
+    lastX = x;
+    lastY = y;
+    const pause = 150 + Math.random() * 450;
+    pendingMove = setTimeout(hop, duration + pause);
+  }
+
+  dodo.addEventListener("click", () => {
+    if (caught) return;
+    caught = true;
+    if (pendingMove) clearTimeout(pendingMove);
+    // Lock the dodo where it is right now so it doesn't keep gliding.
+    const rect = dodo.getBoundingClientRect();
+    dodo.style.transition = "none";
+    dodo.style.transform = `translate(${Math.round(rect.left)}px, ${Math.round(rect.top)}px)`;
+    dodo.classList.add("caught");
+    // Wait for the catch + puff animation, then drop the node.
+    setTimeout(() => dodo.remove(), 700);
+  });
+
+  // Re-clamp on resize so a shrunk window doesn't park the dodo offscreen.
+  window.addEventListener("resize", () => {
+    if (caught) return;
+    lastX = Math.min(lastX, window.innerWidth - 140);
+    lastY = Math.min(lastY, window.innerHeight - 140);
+  });
+
+  setTimeout(hop, 600);
+})();
+
 const run1Btn = document.getElementById("run1");
 const run2Btn = document.getElementById("run2");
 const resetBtn = document.getElementById("reset");

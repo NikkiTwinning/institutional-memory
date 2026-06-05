@@ -206,13 +206,16 @@
   <p>Memory store: persisted on the Claude platform. Activity log shows the tool calls Claude made to <code>/mnt/memory/</code>.</p>
 </footer>
 
-<script src="/static/app.js"></script>
-
-<!-- dodo mascot -->
-<div class="dodo-popup" id="dodoPopup">
-  <img src="/static/dodo.png" alt="Dodo mascot" class="dodo-img" />
-  <button class="dodo-close" onclick="document.getElementById('dodoPopup').style.display='none'" title="Shoo!">&times;</button>
+<!-- runaway dodo: clicks anywhere on it catch it and it disappears -->
+<div class="dodo-stage" id="dodoStage" aria-hidden="false">
+  <button class="dodo-runner" id="dodoRunner" type="button" aria-label="Catch the dodo">
+    <img src="/static/dodo.png" alt="" class="dodo-img" />
+    <span class="dodo-puff" aria-hidden="true">caught!</span>
+  </button>
 </div>
+
+<!-- app.js must come after the dodo markup so its setup IIFE can find it -->
+<script src="/static/app.js"></script>
 
 </body>
 </html>
